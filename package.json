@@ -2,9 +2,11 @@
   "name": "Caret",
   "version": "0.0.1",
   "scripts": {
-    "build": "grunt"
+    "build": "grunt pwa",
+    "debug": "(dhost -a &) && grunt debug"
   },
   "dependencies": {
+    "dhost": "^0.1.8",
     "grunt": "*",
     "grunt-contrib-less": "*",
     "grunt-contrib-watch": "*",

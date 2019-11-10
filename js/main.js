@@ -1,6 +1,10 @@
-chrome.version = window.navigator.appVersion.match(/Chrome\/(\d+)/)[1] * 1 || 0;
+require(["chrome"], function(chromeGlobal) {
+  window.chrome = chromeGlobal;
+  
+})
 
 require([
+    "chrome",
     "command",
     "editor",
     "storage/settingsProvider",
@@ -12,7 +16,7 @@ require([
     "api",
     "sequences",
     "ui"
-  ], function(command, editor, Settings, dialog, sessions, i18n, chromeP) {
+  ], function(chrome_, command, editor, Settings, dialog, sessions, i18n, chromeP) {
 
   //translate inline strings
   i18n.page();
