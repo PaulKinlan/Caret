@@ -49,14 +49,14 @@ module.exports = function(grunt) {
   grunt.registerTask("debug", ["pwa"]);
 
   grunt.registerTask("serviceWorker", "Builds a service worker", function () {
-    const swDest = "build/unpacked/sw.js";
+    const swDest = "./dist/sw.js";
     const done = this.async();
     generateSW({
       swDest,
       clientsClaim: true,
       skipWaiting: true,
       cleanupOutdatedCaches: true,
-      globDirectory: "build/unpacked/",
+      globDirectory: "dist/",
       globPatterns: ['**/*.{js,png,html,css,json}'],
       // Other configuration options...
     }).then(({count, size}) => {
@@ -67,7 +67,7 @@ module.exports = function(grunt) {
 
   grunt.registerTask("copyUnpacked", "Copies files to the build directory", function() {
     var srcPatterns = grunt.config.get("copy");
-    var files = grunt.file.expandMapping(srcPatterns, "./build/unpacked", {
+    var files = grunt.file.expandMapping(srcPatterns, "./dist/", {
       filter: "isFile"
     });
     files.forEach(function(f) {
@@ -77,7 +77,7 @@ module.exports = function(grunt) {
 
   grunt.registerTask("cleanup", "Removes the build/unpacked directory", function() {
     var c = this.async();
-    exec("rm -rf ./build/*", c);
+    exec("rm -rf ./dist/*", c);
   });
 
   grunt.registerTask("checkLocale", "Finds unregistered strings for a given locale; checkLocale:XX for a language code XX", function(language) {
@@ -89,6 +89,5 @@ module.exports = function(grunt) {
         console.log(`- Missing string: ${k}`);
       }
     }
-  })
-
+  });
 };

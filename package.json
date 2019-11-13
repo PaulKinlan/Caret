@@ -3,7 +3,7 @@
   "version": "0.0.1",
   "scripts": {
     "build": "grunt pwa",
-    "debug": "grunt debug && (dhost ./build/unpacked/ -a) && grunt watch"
+    "debug": "grunt debug && (dhost ./dist/ -a) && grunt watch"
   },
   "dependencies": {
     "dhost": "^0.1.8",
@@ -11,6 +11,7 @@
     "grunt-contrib-less": "*",
     "grunt-contrib-watch": "*",
     "jszip": "^2.6.0",
+    "now": "^16.5.2",
     "workbox-build": "^4.3.1"
   },
   "repository": {
