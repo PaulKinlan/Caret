@@ -1,6 +1,7 @@
 module.exports = function(grunt) {
 
   var exec = require("child_process").exec;
+  const {generateSW} = require("workbox-build");
   var path = require("path");
   var fs = require("fs");
   var Zip = require("jszip");
@@ -47,8 +48,25 @@ module.exports = function(grunt) {
   });
 
   grunt.registerTask("default", ["less", "watch"]);
-  grunt.registerTask("pwa", ["less", "cleanup", "copyUnpacked"]);
-  grunt.registerTask("debug", ["pwa", "watch"]);
+  grunt.registerTask("pwa", ["less", "cleanup", "copyUnpacked", "serviceWorker"]);
+  grunt.registerTask("debug", ["pwa"]);
+
+  grunt.registerTask("serviceWorker", "Builds a service worker", function () {
+    const swDest = "build/unpacked/sw.js";
+    const done = this.async();
+    generateSW({
+      swDest,
+      clientsClaim: true,
+      skipWaiting: true,
+      cleanupOutdatedCaches: true,
+      globDirectory: "build/unpacked/",
+      globPatterns: ['**/*.{js,png,html,css,json}'],
+      // Other configuration options...
+    }).then(({count, size}) => {
+      console.log(`Generated ${swDest}, which will precache ${count} files, totaling ${size} bytes.`);
+      done()
+    });
+  });
 
   grunt.registerTask("copyUnpacked", "Copies files to the build directory", function() {
     var srcPatterns = grunt.config.get("copy");

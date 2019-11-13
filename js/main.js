@@ -138,4 +138,8 @@ require([
     window.open(url, "target=_blank");
   });
 
+  if("serviceWorker" in navigator) {
+    navigator.serviceWorker.register('/sw.js');
+  }
+
 });

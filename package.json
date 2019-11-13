@@ -3,14 +3,15 @@
   "version": "0.0.1",
   "scripts": {
     "build": "grunt pwa",
-    "debug": "(dhost -a &) && grunt debug"
+    "debug": "grunt debug && (dhost ./build/unpacked/ -a) && grunt watch"
   },
   "dependencies": {
     "dhost": "^0.1.8",
     "grunt": "*",
     "grunt-contrib-less": "*",
     "grunt-contrib-watch": "*",
-    "jszip": "^2.6.0"
+    "jszip": "^2.6.0",
+    "workbox-build": "^4.3.1"
   },
   "repository": {
     "type": "git",
