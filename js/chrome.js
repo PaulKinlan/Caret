@@ -32,7 +32,7 @@ class Chrome {
   get notifications() {
     return this._notifications;
   }
-  
+
   get storage() {
     return this._storage;
   }
@@ -90,9 +90,9 @@ class i18n {
     fetch(`/_locales/${locale}/messages.json`).then(async res => {
       this._lang = await res.json();
     })
-    .catch();
+      .catch();
   }
-  
+
   getMessage(name, substitutions) {
     if (name in this._lang) {
       return this._lang[name].message;
@@ -134,27 +134,40 @@ class AppWindow {
     this._onmaximized = [];
     this._onrestored = [];
     document.addEventListener("fullscreenchange", () => {
-      for(const callback of this._onfullscreened) {
+      for (const callback of this._onfullscreened) {
         callback();
       }
     });
 
-    document.addEventListener("visibilitychange", function() {
+    document.addEventListener("visibilitychange", function () {
       if (document.visibilityState === "visible") {
-        for(const callback in this._onrestored) {
+        for (const callback in this._onrestored) {
           callback();
         }
       }
       else if (document.visibilityState === "hidden") {
-        for(const callback in this._onminimized) {
+        for (const callback in this._onminimized) {
           callback();
         }
       }
     });
   }
 
+
+  close() {
+    this._window.close();
+  }
+
   focus() {
     this._window.focus();
+  }
+
+  minimize() {
+    this._window.minimize();
+  }
+
+  restore() {
+    this._window.moveTo(window.screenX, window.screenY);
   }
 
   isMaximized() {
@@ -167,7 +180,7 @@ class AppWindow {
 
   get onMaximized() {
     return {
-      addListener: (callback) => { 
+      addListener: (callback) => {
         this._onmaximized.push(callback)
       }
     }
@@ -175,7 +188,7 @@ class AppWindow {
 
   get onMinimized() {
     return {
-      addListener: (callback) => { 
+      addListener: (callback) => {
         this._onminimized.push(callback)
       }
     }
@@ -183,7 +196,7 @@ class AppWindow {
 
   get onFullscreened() {
     return {
-      addListener: (callback) => { 
+      addListener: (callback) => {
         this._onfullscreened.push(callback)
       }
     }
@@ -191,7 +204,7 @@ class AppWindow {
 
   get onRestored() {
     return {
-      addListener: (callback) => { 
+      addListener: (callback) => {
         this._onrestored.push(callback)
       }
     }
@@ -199,10 +212,59 @@ class AppWindow {
 }
 
 class Notification {
+  constructor() {
+    this._notifications = new Map;
+    this._notificationsClosed = [];
+    this._notificationsButtonClicked = [];
+    this._notificationsClicked = [];
+  }
+
   get onButtonClicked() {
     return {
-      addListener: () => null
+      addListener: () => (func) => this._notificationsButtonClicked.push(func)
     }
+  }
+
+  get onClicked() {
+    return {
+      addListener: () => (func) => this._notificationsClicked.push(func)
+    }
+  }
+  
+  get onClosed() {
+    return {
+      addListener: (func) => this._notificationsClosed.push(func)
+    }
+  }
+
+  create(id, options, callback) {
+    window.Notification.requestPermission().then(_ => {
+      const notification = new window.Notification(options.title, {
+        tag: id,
+        body: options.message,
+        icon: options.iconUrl,
+        image: options.imageUrl,
+        requireInteraction: options.requireInteraction
+      });
+
+      this._notifications.set(id, notification);
+
+      notification.onclose = () => {
+        this._notificationsClosed.forEach(n => n(notification.tag, false))
+      };
+
+      notification.onclick = () => {
+        this._notificationsClicked.forEach(n => n(notification.tag))
+      }
+
+      callback(id);
+    })
+
+  }
+
+  clear(id, callback) {
+    this._notifications[id].close();
+    callback(true);
   }
 }
 
@@ -220,24 +282,24 @@ class Storage {
           keys = [keys]
         }
 
-        keys.forEach(key => { 
-          if (typeof(key) !== 'string') {
-            key = key.name; 
+        keys.forEach(key => {
+          if (typeof (key) !== 'string') {
+            key = key.name;
           }
           results.push(localStorage[`sync_${key}`]);
         });
-        
+
         callback(results)
       },
       set: (keys, callback) => {
         if (Array.isArray(keys) === false) {
           keys = [keys];
-        } 
+        }
 
-        keys.forEach(key => { 
+        keys.forEach(key => {
           localStorage[`sync_${key}`] = key.key
         });
-        
+
         callback()
       }
     }
@@ -256,24 +318,24 @@ class Storage {
           keys = [keys]
         }
 
-        keys.forEach(key => { 
-          if (typeof(key) !== 'string') {
-            key = key.name; 
+        keys.forEach(key => {
+          if (typeof (key) !== 'string') {
+            key = key.name;
           }
           results.push(localStorage[`local_${key}`]);
         });
-        
+
         callback(results)
       },
       set: (keys, callback) => {
         if (Array.isArray(keys) === false) {
           keys = [keys];
-        } 
+        }
 
-        keys.forEach(key => { 
+        keys.forEach(key => {
           localStorage[`local_${key}`] = key.key
         });
-        
+
         callback()
       }
     }
@@ -296,7 +358,7 @@ class ChromeFileWriter {
   }
 
   truncate(size) {
-    this._writer.truncate(size).then(a=> this.onwriteend());
+    this._writer.truncate(size).then(a => this.onwriteend());
   }
 
   get onerror() {
@@ -317,8 +379,8 @@ class ChromeFileWriter {
 
   write(blob) {
     console.log(blob)
-    this._writer.write(0, blob).then(a=> {
-      this._writer.close().then(b=>{
+    this._writer.write(0, blob).then(a => {
+      this._writer.close().then(b => {
         this.onwriteend()
       });
     });
@@ -375,7 +437,7 @@ class Runtime {
     const opts = { type: 'openDirectory' };
     (async () => {
       const handle = await window.chooseFileSystemEntries(opts);
-      return callback(new DirectorEntry(handle));  
+      return callback(new DirectorEntry(handle));
     })()
   }
 
@@ -386,10 +448,10 @@ class Runtime {
   }
 
   getPlatformInfo(callback) {
-    callback( {
+    callback({
       "PlatformOS": navigator.platform,
       "PlatformArch": navigator.platform
-    }) 
+    })
   }
 
   requestUpdateCheck(callback) {
