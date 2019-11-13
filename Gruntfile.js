@@ -2,9 +2,6 @@ module.exports = function(grunt) {
 
   var exec = require("child_process").exec;
   const {generateSW} = require("workbox-build");
-  var path = require("path");
-  var fs = require("fs");
-  var Zip = require("jszip");
 
   grunt.loadNpmTasks("grunt-contrib-less");
   grunt.loadNpmTasks("grunt-contrib-watch");
